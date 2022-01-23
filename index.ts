@@ -46,5 +46,13 @@ client.on("MESSAGE_CREATE", async message => {
         content: args.join(" ")
       })
       break
+    case "!random":
+      const random = Math.random()
+      client.channel.createMessage(message.channel_id,
+        {
+          content: random < 0.5 ? "Pile !" : random > 0.9 ? "Tranche !" : "Face !"
+        }
+      )
+      break
   }
 }) 
