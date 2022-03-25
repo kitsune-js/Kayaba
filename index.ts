@@ -1,20 +1,23 @@
-import { PresenceUpdateStatus } from 'discord-api-types';
 import { Client } from 'higa';
 require("dotenv").config()
 
 const client = new Client(
-  process.env.DISCORD,
-  [
-    'GUILD_MESSAGES',
-    'DIRECT_MESSAGES'
-  ]
+  {
+    token: process.env.DISCORD ?? "",
+    tokenType: "Bot",
+    intents: [
+      'GUILD_MESSAGES',
+      'DIRECT_MESSAGES'
+    ],
+  }
 )
 
 client.on('READY', () => {
   console.log("Connected !")
   client.setStatus(
     {
-      status: PresenceUpdateStatus.Idle,
+      // @ts-ignore That's just stupid, I will write my own version of DAT
+      status: "idle",
       activities: [
         {
           name: "the world of Swort Art Online falling appart",
@@ -27,32 +30,26 @@ client.on('READY', () => {
   )
 })
 
-// quick command handler to test features
-client.on("MESSAGE_CREATE", async message => {
-  if (message.author.bot) return
-  const [cmd, ...args] = message.content.split(" ")
-  switch (cmd) {
-    case "!ping":
+// Create a quick command handler using a switch statement, prefix is !
+client.on('MESSAGE_CREATE', async (message) => {
+  if (message.author.bot) return;
+  if (!message.content.startsWith("!")) return;
+
+  // Split the message into a command and a string
+  const args = message.content.slice(1).split(/ +/);
+  const command = args.shift()?.toLowerCase();
+
+  switch (command) {
+    case "ping":
       client.channel.createMessage(message.channel_id, {
-        content: "Pong ! 🏓",
-        message_reference: {
-          message_id: message.id
-        }
+        content: "Pong !"
       })
-      break
-    case "!say":
+      break;
+    case "say":
       client.channel.deleteMessage(message.channel_id, message.id)
       client.channel.createMessage(message.channel_id, {
         content: args.join(" ")
       })
-      break
-    case "!random":
-      const random = Math.random()
-      client.channel.createMessage(message.channel_id,
-        {
-          content: random < 0.5 ? "Pile !" : random > 0.9 ? "Tranche !" : "Face !"
-        }
-      )
-      break
+      break;
   }
-}) 
+})
